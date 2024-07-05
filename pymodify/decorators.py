@@ -1,6 +1,7 @@
 import inspect
 
-from rule import Check, Rule
+from .check import Check
+from .correction import Correction
 
 
 def check(f=None, /, *, name=None, description=None, tags=()):
@@ -17,14 +18,14 @@ def check(f=None, /, *, name=None, description=None, tags=()):
         return accept(f)
     
     
-def rule(f=None, /, *, condition=None, name=None, description=None, tags=()):
+def correction(f=None, /, *, condition=None, name=None, description=None, tags=()):
     def accept(g):
-        return Rule(name=name or g.__name__,
-                    description=description or inspect.getdoc(g),
-                    condition=condition,
-                    action=g,
-                    tags=tags,
-                    )
+        return Correction(name=name or g.__name__,
+                          description=description or inspect.getdoc(g),
+                          condition=condition,
+                          action=g,
+                          tags=tags,
+                          )
 
     if f is None:
         return accept
