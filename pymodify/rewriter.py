@@ -1,20 +1,17 @@
 import ast
+import itertools
+
 
 class RewriteExpression(ast.NodeTransformer):
     def visit_BoolOp(self, node):
         self.generic_visit(node)
-        print(0)
-        print(node.op)
         match node.op:
             case ast.And():
                 res = node.values[0]
                 for value in node.values[1:]:
                     res = ast.BinOp(res, ast.BitAnd(), value)
                 return res
-
-                # return ast.BinOp(node.values[0], ast.BitAnd(), node.values[1])
             case ast.Or():
-                # return ast.BinOp(node.values[0], ast.BitOr(), node.values[1])
                 res = node.values[0]
                 for value in node.values[1:]:
                     res = ast.BinOp(res, ast.BitOr(), value)
@@ -25,15 +22,26 @@ class RewriteExpression(ast.NodeTransformer):
 
     # TODO Undo operator chaining
     # TODO Turn in into '.isin'
-    # def visit_Compare(self, node):
-    #     self.generic_visit(node)
-    #     result = node.left
-    #     for op, cmp in zip(node.ops, node.comparators):
-    #         result = ast.BinOp()
-    #
-    #
-    #     if 'in' in node.ops:
-    #         return
+    def visit_Compare(self, node):
+        self.generic_visit(node)
+
+        parts = []
+
+        left = node.left
+
+        for op, right in zip(node.ops, node.comparators):
+            if isinstance(op, ast.In):
+                part = ast.Call(ast.Attribute(value=left, attr="isin", ctx=ast.Load()),
+                                args=[right], keywords=[])
+            else:
+                part = ast.Compare(left, [op], [right])
+            parts.append(part)
+            left = right
+
+        res = parts[0]
+        for value in parts[1:]:
+            res = ast.BinOp(res, ast.BitAnd(), value)
+        return res
 
     def visit_If(self, node):
         self.generic_visit(node)
@@ -58,4 +66,10 @@ print(rewrite_expression(expr))
 # expr = "if a > 2: h==3 and d<2"
 
 expr = "width < height or width == height or width > height"
+print(rewrite_expression(expr))
+
+expr = "width < height > depth"
+print(rewrite_expression(expr))
+
+expr = "x in ['huis', 'boom', 'beest']"
 print(rewrite_expression(expr))
