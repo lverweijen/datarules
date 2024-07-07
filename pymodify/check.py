@@ -1,19 +1,21 @@
 import dataclasses
 import warnings
-from typing import Collection, Callable, Any
+from typing import Callable, Any
 
 import pandas as pd
 
 from .primitives import Condition, FunctionCondition
+from .rule import Rule, RuleResult
 
 
 @dataclasses.dataclass(slots=True)
-class Check:
+class Check(Rule):
     condition: Condition | str | Callable[[Any], bool]
-    name: str = None
-    description: str = ""
-    tags: Collection[str] = ()
     rewrite: bool = True
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
 
     def __post_init__(self):
         self.condition = Condition.make(self.condition, rewrite=self.rewrite)
@@ -23,8 +25,7 @@ class Check:
             self.name = self.name or condition.name
             self.description = self.description or condition.description
 
-        elif self.name is None:
-            self.name = f"condition_{id(self)}"
+        self._rule_init()
 
     def __call__(self, *args, **kwargs):
         return self.condition(*args, **kwargs)
@@ -54,7 +55,9 @@ class Check:
         return condition
 
 
-class CheckResult:
+class CheckResult(RuleResult):
+    fields = ["name", "condition", "items", "passes", "fails", "NAs", "error", "warnings"]
+
     def __init__(self, check, result=None, error=None, warnings=()):
         self.check = check
         self.result = result
@@ -111,33 +114,3 @@ class CheckResult:
     @property
     def has_error(self):
         return self.error is not None
-
-
-class CheckReport(Collection[CheckResult]):
-    def __init__(self, check_results, index=None):
-        self.check_results = check_results
-        self.index = index
-
-    def __contains__(self, item):
-        return item in self
-
-    def __iter__(self):
-        return iter(self.check_results)
-
-    def __len__(self):
-        return len(self.check_results)
-
-    def summary(self):
-        return pd.DataFrame([res.summary() for res in self])
-
-    def dataframe(self):
-        return pd.DataFrame({
-            res.check.name: res.result for res in self
-        }, index=self.index)
-
-
-def run_checks(data, checklist):
-    results = []
-    for check in checklist:
-        results.append(check.run(data))
-    return CheckReport(results, index=getattr(data, "index", None))

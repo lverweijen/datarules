@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from pymodify import check, correction, run_corrections
+from pymodify import check, correction, Runner
 
 
 @check
@@ -33,23 +33,22 @@ class CorrectionTests(TestCase):
 
     def test_correction(self):
         df = self.df.copy()
-        make_square.condition(df)
         result = make_square.run(df)
         self.assertEqual("make_square", str(result.correction.name))
-        self.assertEqual("check_almost_square.fails(width, height)", str(result.correction.condition))
+        self.assertEqual("check_almost_square.fails(width, height)", str(result.correction.trigger))
         self.assertEqual("make_square(width, height)", str(result.correction.action))
         self.assertEqual(2, result.applied.sum())
         self.assertEqual(None, result.error)
         self.assertEqual(0, len(result.warnings))
 
     def test_corrections_together(self):
-        check_report = run_corrections(self.df, correctionlist)
+        check_report = Runner().correct(self.df, correctionlist)
         summary = check_report.summary()
         dataframe = check_report.dataframe()
 
         expected_summary = [
             {'name': 'make_square',
-             'condition': 'check_almost_square.fails(width, height)',
+             'trigger': 'check_almost_square.fails(width, height)',
              'action': 'make_square(width, height)',
              'applied': 2,
              'error': None,

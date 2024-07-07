@@ -22,7 +22,7 @@ def correction(f=None, /, *, condition=None, name=None, description=None, tags=(
     def accept(g):
         return Correction(name=name or g.__name__,
                           description=description or inspect.getdoc(g),
-                          condition=condition,
+                          trigger=condition,
                           action=g,
                           tags=tags,
                           )

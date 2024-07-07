@@ -35,7 +35,7 @@ def check_not_too_deep(depth):
 In your main code:
 ```python
 import pandas as pd
-from pymodify import load_checks, run_checks
+from pymodify import load_checks, Runner
 
 df = pd.DataFrame([
     {"width": 3, "height": 7},
@@ -46,7 +46,7 @@ df = pd.DataFrame([
 ])
 
 checks = load_checks('checks.py')
-report = run_checks(df, checks)
+report = Runner().check(df, checks)
 print(report)
 ```
 
@@ -62,7 +62,7 @@ Output:
 
 In corrections.py
 ```python
-from pymodify import check
+from pymodify import correction
 from checks import check_almost_square
 
 @correction(condition=check_almost_square.fails)
@@ -72,10 +72,10 @@ def make_square(width, height):
 
 In your main code:
 ```python
-from pymodify import load_corrections, run_corrections
+from pymodify import load_corrections
 
 corrections = load_corrections('corrections.py')
-report = run_corrections(df, checks)
+report = Runner().correct(df, corrections)
 print(report)
 ```
 
@@ -91,7 +91,6 @@ This package draws some inspiration from the following R packages:
  
 - [dcmodify](https://github.com/data-cleaning/dcmodify)
 - [validate](https://github.com/data-cleaning/validate)
-- [editrules](https://github.com/data-cleaning/editrules)
 - [errorlocate](https://github.com/data-cleaning/errorlocate)
 - [deductive](https://github.com/data-cleaning/deductive)
 
@@ -100,3 +99,7 @@ Features found in one of the packages above, might eventually make it into this 
 ## Similar work (python)
 
 - [Great Expectations](https://github.com/great-expectations/great_expectations) - An overengineered alternative that only identifies errors. It may have some good ideas, but it's not very simple to use and doesn't correct errors.
+- [pyrules](https://github.com/miraculixx/pyrules) - Dead project that only does corrections.
+- [pyruler](https://github.com/danteay/pyruler) - Dead project that only does checking.
+- [contessa](https://github.com/kiwicom/contessa) - Does checking only. Meant to be used against databases.
+- [validator](https://github.com/CSenshi/Validator) - Does checking only. Can only check variables independently.

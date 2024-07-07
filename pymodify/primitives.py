@@ -1,6 +1,7 @@
 import inspect
 from abc import ABCMeta
 
+from pymodify.collector import collect_variables
 from pymodify.rewriter import rewrite_expression
 
 
@@ -22,6 +23,7 @@ class StringCondition(Condition):
         if rewrite:
             code = rewrite_expression(code)
         self.code = code
+        self.parameters = collect_variables(code).inputs
 
     def __str__(self):
         return self.code
@@ -74,6 +76,7 @@ class Action(metaclass=ABCMeta):
 class StringAction(Action):
     def __init__(self, code):
         self.code = code
+        self.parameters = collect_variables(code).inputs
 
     def __str__(self):
         return self.code

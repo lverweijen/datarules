@@ -1,33 +1,38 @@
 import dataclasses
-from typing import Collection
-
-import pandas as pd
 
 from .primitives import Condition, FunctionAction, Action
 from .check import Check
+from .rule import RuleResult, Rule
 
 
 @dataclasses.dataclass(slots=True)
-class Correction:
+class Correction(Rule):
     action: Action
-    condition: Condition
-    name: str = None
-    description: str = ""
-    tags: Collection[str] = ()
+    trigger: Condition
+
+    @classmethod
+    def from_dict(cls, data):
+        # Renames
+        if "if" in data:
+            data["trigger"] = data.pop("if")
+        if "then" in data:
+            data["action"] = data.pop("then")
+
+        return cls(**data)
 
     def __post_init__(self):
-        if isinstance(self.condition, Check):
+        if isinstance(self.trigger, Check):
             raise ValueError("Check can not be used as a condition, but `check.fails` can.")
 
-        self.condition = Condition.make(self.condition)
+        self.trigger = Condition.make(self.trigger)
         self.action = Action.make(self.action)
 
         if isinstance(self.action, FunctionAction):
             action = self.action
             self.name = self.name or action.name
             self.description = self.description or action.description
-        elif self.name is None:
-            self.name = f"rule_{id(self)}"
+
+        self._rule_init()
 
     def __call__(self, *args, **kwargs):
         return self.action(*args, **kwargs)
@@ -37,7 +42,7 @@ class Correction:
         error = None
 
         try:
-            is_applicable = self.condition(data)
+            is_applicable = self.trigger(data)
             result = self.action(data)
         except Exception as err:
             error = err
@@ -51,7 +56,9 @@ class Correction:
                                 warnings=())
 
 
-class CorrectionResult:
+class CorrectionResult(RuleResult):
+    fields = ["name", "trigger", "action", "applied", "error", "warnings"]
+
     def __init__(self, correction, applied, error=None, warnings=()):
         self.correction = correction
         self.applied = applied
@@ -69,7 +76,7 @@ class CorrectionResult:
 
         return {
             "name": str(self.correction.name),
-            "condition": str(self.correction.condition),
+            "trigger": str(self.correction.trigger),
             "action": str(self.correction.action),
             "applied": count_applied,
             "error": self.error,
@@ -79,33 +86,3 @@ class CorrectionResult:
     @property
     def has_error(self):
         return self.error is not None
-
-
-class CorrectionReport(Collection[CorrectionResult]):
-    def __init__(self, check_results, index=None):
-        self.check_results = check_results
-        self.index = index
-
-    def __contains__(self, item):
-        return item in self
-
-    def __iter__(self):
-        return iter(self.check_results)
-
-    def __len__(self):
-        return len(self.check_results)
-
-    def summary(self):
-        return pd.DataFrame([res.summary() for res in self])
-
-    def dataframe(self):
-        return pd.DataFrame({
-            res.correction.name: res.applied for res in self
-        }, index=self.index)
-
-
-def run_corrections(data, correctionlist):
-    results = []
-    for check in correctionlist:
-        results.append(check.run(data))
-    return CorrectionReport(results, index=getattr(data, "index", None))

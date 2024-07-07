@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from pymodify import check, run_checks, Check
+from pymodify import check, Check, Runner
 
 
 @check
@@ -90,7 +90,7 @@ class CheckTests(TestCase):
         self.assertEqual([], check_result.warnings)
 
     def test_check_together(self):
-        check_report = run_checks(self.df, checklist)
+        check_report = Runner().check(self.df, checklist)
         summary = check_report.summary()
         dataframe = check_report.dataframe()
 
