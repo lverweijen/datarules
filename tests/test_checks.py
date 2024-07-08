@@ -92,7 +92,7 @@ class CheckTests(TestCase):
     def test_check_together(self):
         check_report = Runner().check(self.df, checklist)
         summary = check_report.summary()
-        dataframe = check_report.dataframe()
+        dataframe = check_report.dataframe(errors_only=False)
 
         expected_summary = [
             {'name': 'check_almost_square',

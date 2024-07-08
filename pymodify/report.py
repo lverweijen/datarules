@@ -39,10 +39,15 @@ class Report(Collection[TResult], metaclass=ABCMeta):
 class CheckReport(Report[CheckResult]):
     result_cls = CheckResult
 
-    def dataframe(self):
-        return pd.DataFrame({
+    def dataframe(self, errors_only=True):
+        df = pd.DataFrame({
             res.check.name: res.result for res in self
         }, index=self.index)
+
+        if errors_only:
+            df = df[~df.all(axis='columns')]
+
+        return df
 
 
 class CorrectionReport(Report[CorrectionResult]):
