@@ -1,0 +1,6 @@
+rules:
+- name: check_almost_square
+  condition: (width - height).abs() < 5
+  tags: P1 basic
+- name: check_depth
+  condition: depth < 3

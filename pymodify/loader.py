@@ -33,21 +33,24 @@ def load_corrections(path_or_seq: os.PathLike | Iterable[Mapping]) -> List[Corre
 def _load_rules(path_or_seq: os.PathLike | Iterable[Mapping], rule_type):
     if isinstance(path_or_seq, (str, os.PathLike)):
         suffix = Path(path_or_seq).suffix
-        match suffix:
-            case ".py":
-                return _load_rules_py(path_or_seq, rule_type)
-            case ".yaml":
-                try:
-                    import yaml
-                    objects = yaml.safe_load(path_or_seq)
-                except ImportError:
-                    raise ImportError("Yaml not installed.")
-            case ".json":
-                objects = json.load(path_or_seq)
-            case ".csv":
-                objects = csv.DictReader(path_or_seq)
-            case _:
-                raise ValueError(f"Suffix {suffix} Not supported")
+
+        if suffix == ".py":
+            return _load_rules_py(path_or_seq, rule_type)
+
+        with open(path_or_seq) as fp:
+            match suffix:
+                case ".yaml":
+                    try:
+                        import yaml
+                        objects = yaml.safe_load(fp)
+                    except ImportError:
+                        raise ImportError("Yaml not installed.")
+                case ".json":
+                    objects = json.load(fp)
+                case ".csv":
+                    objects = csv.DictReader(fp)
+                case _:
+                    raise ValueError(f"Suffix {suffix} Not supported")
     else:
         objects = path_or_seq
     return _load_rules_seq(objects, rule_type)

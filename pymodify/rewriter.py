@@ -60,16 +60,22 @@ def rewrite_expression(string):
     return ast.unparse(rewritten)
 
 
-expr = "if a > 2: h==3 and d<2"
-print(rewrite_expression(expr))
+def main():
+    expr = "if a > 2: h==3 and d<2"
+    print(rewrite_expression(expr))
 
-# expr = "if a > 2: h==3 and d<2"
+    # expr = "if a > 2: h==3 and d<2"
+    # print(rewrite_expression(expr))
 
-expr = "width < height or width == height or width > height"
-print(rewrite_expression(expr))
+    expr = "width < height or width == height or width > height"
+    print(rewrite_expression(expr))
 
-expr = "width < height > depth"
-print(rewrite_expression(expr))
+    expr = "width < height > depth"
+    print(rewrite_expression(expr))
 
-expr = "x in ['huis', 'boom', 'beest']"
-print(rewrite_expression(expr))
+    expr = "x in ['huis', 'boom', 'beest']"
+    print(rewrite_expression(expr))
+
+
+if __name__ == "__main__":
+    main()

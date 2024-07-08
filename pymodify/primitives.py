@@ -76,7 +76,9 @@ class Action(metaclass=ABCMeta):
 class StringAction(Action):
     def __init__(self, code):
         self.code = code
-        self.parameters = collect_variables(code).inputs
+        variables = collect_variables(code)
+        self.parameters = variables.inputs
+        self.targets = variables.outputs
 
     def __str__(self):
         return self.code
@@ -84,7 +86,12 @@ class StringAction(Action):
     def __call__(self, data=None, **kwargs):
         if data is None:
             data = {}
-        exec(self.code, data, kwargs)
+        else:
+            data = {parameter: data[parameter] for parameter in self.parameters}
+
+        exec(self.code, kwargs, data)
+        result = {target: data[target] for target in self.targets}
+        return result
 
 
 class FunctionAction(Action):

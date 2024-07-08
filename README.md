@@ -2,19 +2,22 @@
 
 ## Goal and motivation
 
-The idea of the project is to create similar tools as can be found on https://github.com/data-cleaning/, but to use python instead of R.
+The idea of this project is to define rules to validate and correct data in pandas dataframes.
+Whenever possible, it does this in a vectorized way, which makes this library really fast.
+
 
 Reasons to make this:
 - Implement the whole data pipeline in a single language (python).
+No need to call subprocess or http to send your data to R and back.
 - Directly use pandas and all other python packages you are already familiar with. No need to relearn how everything is done in R.
-- No need to call subprocess or http to send your data to R and back.
+- Validation can be very fast if vectorized.
 
-## Status:
+## Usage
 
-For now this package provides two operations on data:
+This package provides two operations on data:
 
-- checks (if data is correct)
-- corrections (corrections to fix data)
+- checks (if data is correct). Also knows as validations.
+- corrections (how to fix incorrect data)
 
 ### Checks
 
@@ -22,12 +25,12 @@ In checks.py
 ```python
 from pymodify import check
 
-@check
+@check(tags=["P1"])
 def check_almost_square(width, height):
     return (width - height).abs() < 5
 
 
-@check
+@check(tags=["P3", "completeness"])
 def check_not_too_deep(depth):
     return depth < 3
 ```
@@ -87,19 +90,23 @@ Output:
 
 ## Similar work (R)
 
-This package draws some inspiration from the following R packages:
+This project is inspired by https://github.com/data-cleaning/.
+Similar functionality can be found in the following R packages:
  
 - [dcmodify](https://github.com/data-cleaning/dcmodify)
 - [validate](https://github.com/data-cleaning/validate)
 - [errorlocate](https://github.com/data-cleaning/errorlocate)
 - [deductive](https://github.com/data-cleaning/deductive)
 
-Features found in one of the packages above, might eventually make it into this package too.
+Features found in one of the packages above but not implemented here, might eventually make it into this package too.
 
 ## Similar work (python)
 
-- [Great Expectations](https://github.com/great-expectations/great_expectations) - An overengineered alternative that only identifies errors. It may have some good ideas, but it's not very simple to use and doesn't correct errors.
+Some offer similar functionality. However, so far none of these are vectorized on arrays.
+
+- [Great Expectations](https://github.com/great-expectations/great_expectations) - An overengineered alternative that only does validation.
 - [pyrules](https://github.com/miraculixx/pyrules) - Dead project that only does corrections.
-- [pyruler](https://github.com/danteay/pyruler) - Dead project that only does checking.
-- [contessa](https://github.com/kiwicom/contessa) - Does checking only. Meant to be used against databases.
-- [validator](https://github.com/CSenshi/Validator) - Does checking only. Can only check variables independently.
+- [pyruler](https://github.com/danteay/pyruler) - Dead project that only does validation.
+- [contessa](https://github.com/kiwicom/contessa) - Does validation only. Meant to be used against databases.
+- [validator](https://github.com/CSenshi/Validator) - Does validation only. Can only check variables independently.
+- [python-valid8](https://github.com/smarie/python-valid8) - Does validation.

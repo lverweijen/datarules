@@ -1,0 +1,11 @@
+rules:
+- name: make_square
+  description: If not a square, then adjust height.
+  if: (width - height).abs() >= 5
+  then: height = height + (width - height) / 2
+  tags: [P1]
+- name: fill_depth
+  description: If depth is missing, impute mean value
+  if: depth.isna()
+  then: depth = depth.mean()
+  tags: [P3, missing]

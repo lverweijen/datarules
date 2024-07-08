@@ -14,7 +14,7 @@ class Report(Collection[TResult], metaclass=ABCMeta):
     result_cls = RuleResult
 
     def __init__(self, results, index=None):
-        self.results = results
+        self.results = list(results)
         self.index = index
 
     def __contains__(self, item):
