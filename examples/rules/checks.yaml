@@ -4,3 +4,5 @@ rules:
   tags: P1 basic
 - name: check_depth
   condition: depth < 3
+- name: height_is_even
+  condition: height % 2 == 0

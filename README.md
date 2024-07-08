@@ -2,15 +2,15 @@
 
 ## Goal and motivation
 
-The idea of this project is to define rules to validate and correct data in pandas dataframes.
-Whenever possible, it does this in a vectorized way, which makes this library really fast.
+The idea of this project is to define rules to validate and correct datasets.
+Whenever possible, it does this in a vectorized way, which makes this library fast.
 
 
 Reasons to make this:
 - Implement the whole data pipeline in a single language (python).
 No need to call subprocess or http to send your data to R and back.
 - Directly use pandas and all other python packages you are already familiar with. No need to relearn how everything is done in R.
-- Validation can be very fast if vectorized.
+- Validation can be fast if vectorized.
 
 ## Usage
 
@@ -88,25 +88,30 @@ Output:
 0  make_square  check_almost_square.fails(width, height)  make_square(width, height)        2  None         0
 ```
 
+## Similar work (python)
+
+These work on pandas:
+
+- [Pandera](https://pandera.readthedocs.io/en/stable/index.html) - A good alternative for validation only. Like us, their checks are vectorized too.
+- [Pandantic](https://github.com/wesselhuising/pandantic) - A combination of validation and parsing based on [pydantic](https://docs.pydantic.dev/latest/).
+
+The following offer validation only, but none of them seem to be vectorized or support pandas directly.
+
+- [Great Expectations](https://github.com/great-expectations/great_expectations) - An overengineered library for validation that has confusing documentation.
+- [contessa](https://github.com/kiwicom/contessa) - Meant to be used against databases.
+- [validator](https://github.com/CSenshi/Validator)
+- [python-valid8](https://github.com/smarie/python-valid8)
+- [pyruler](https://github.com/danteay/pyruler) - Dead project that is rule-based.
+- [pyrules](https://github.com/miraculixx/pyrules) - Dead project for corrections.
+
 ## Similar work (R)
 
 This project is inspired by https://github.com/data-cleaning/.
 Similar functionality can be found in the following R packages:
- 
-- [dcmodify](https://github.com/data-cleaning/dcmodify)
+
 - [validate](https://github.com/data-cleaning/validate)
+- [dcmodify](https://github.com/data-cleaning/dcmodify)
 - [errorlocate](https://github.com/data-cleaning/errorlocate)
 - [deductive](https://github.com/data-cleaning/deductive)
 
 Features found in one of the packages above but not implemented here, might eventually make it into this package too.
-
-## Similar work (python)
-
-Some offer similar functionality. However, so far none of these are vectorized on arrays.
-
-- [Great Expectations](https://github.com/great-expectations/great_expectations) - An overengineered alternative that only does validation.
-- [pyrules](https://github.com/miraculixx/pyrules) - Dead project that only does corrections.
-- [pyruler](https://github.com/danteay/pyruler) - Dead project that only does validation.
-- [contessa](https://github.com/kiwicom/contessa) - Does validation only. Meant to be used against databases.
-- [validator](https://github.com/CSenshi/Validator) - Does validation only. Can only check variables independently.
-- [python-valid8](https://github.com/smarie/python-valid8) - Does validation.

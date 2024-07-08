@@ -1,6 +1,7 @@
 import dataclasses
+import traceback
 import warnings
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 
 import pandas as pd
 
@@ -12,6 +13,7 @@ from .rule import Rule, RuleResult
 class Check(Rule):
     condition: Condition | str | Callable[[Any], bool]
     rewrite: bool = True
+    columns: Optional[str] = None
 
     @classmethod
     def from_dict(cls, data):
@@ -25,19 +27,27 @@ class Check(Rule):
             self.name = self.name or condition.name
             self.description = self.description or condition.description
 
+        if isinstance(self.columns, str):
+            self.columns = [self.columns]
+
         self._rule_init()
 
-    def __call__(self, *args, **kwargs):
-        return self.condition(*args, **kwargs)
+    def __call__(self, data=None, **kwargs):
+        # Renaming
+        if self.columns:
+            data = {p: data[c] for p, c in zip(self.condition.parameters, self.columns)}
 
-    def run(self, *args, **kwargs) -> "CheckResult":
+        return self.condition(data, **kwargs)
+
+    def run(self, data=None, **kwargs) -> "CheckResult":
         try:
             with warnings.catch_warnings(record=True) as wrn:
-                result = self(*args, **kwargs)
+                result = self(data, **kwargs)
             error = None
         except Exception as err:
             result = None
             error = err
+            traceback.print_exc()
 
         return CheckResult(check=self,
                            result=result,

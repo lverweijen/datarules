@@ -1,4 +1,7 @@
 import dataclasses
+import traceback
+
+import pandas as pd
 
 from .primitives import Condition, FunctionAction, Action
 from .check import Check
@@ -42,11 +45,15 @@ class Correction(Rule):
         error = None
 
         try:
-            is_applicable = self.trigger(data)
+            is_applicable = self.trigger(data)  # Also handle true/false
             result = self.action(data)
         except Exception as err:
             error = err
+            traceback.print_exc()
         else:
+            if isinstance(is_applicable, bool):
+                is_applicable = pd.Series(is_applicable, index=data.index)
+
             for k, v in result.items():
                 data.loc[is_applicable, k] = v
 

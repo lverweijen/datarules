@@ -63,6 +63,7 @@ def _load_rules_py(path, rule_type):
     rules = []
     for name, value in module.__dict__.items():
         if isinstance(value, rule_type):
+            value.name = name
             rules.append(value)
     return rules
 
