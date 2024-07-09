@@ -1,4 +1,4 @@
-from pymodify import check, Check
+from datarules import check, Check
 
 
 @check(tags=["P1", "basic"])

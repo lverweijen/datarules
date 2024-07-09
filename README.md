@@ -22,8 +22,10 @@ This package provides two operations on data:
 ### Checks
 
 In checks.py
+
 ```python
-from pymodify import check
+from datarules import check
+
 
 @check(tags=["P1"])
 def check_almost_square(width, height):
@@ -36,9 +38,10 @@ def check_not_too_deep(depth):
 ```
 
 In your main code:
+
 ```python
 import pandas as pd
-from pymodify import load_checks, Runner
+from datarules import load_checks, Runner
 
 df = pd.DataFrame([
     {"width": 3, "height": 7},
@@ -64,9 +67,11 @@ Output:
 ### Corrections
 
 In corrections.py
+
 ```python
-from pymodify import correction
+from datarules import correction
 from checks import check_almost_square
+
 
 @correction(condition=check_almost_square.fails)
 def make_square(width, height):
@@ -74,8 +79,9 @@ def make_square(width, height):
 ```
 
 In your main code:
+
 ```python
-from pymodify import load_corrections
+from datarules import load_corrections
 
 corrections = load_corrections('corrections.py')
 report = Runner().correct(df, corrections)

@@ -1,4 +1,4 @@
-from pymodify import check, correction
+from datarules import check, correction
 
 
 # This check is repeated here

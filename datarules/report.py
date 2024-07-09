@@ -3,9 +3,9 @@ from typing import Collection, TypeVar
 
 import pandas as pd
 
-from pymodify.check import CheckResult
-from pymodify.correction import CorrectionResult
-from pymodify.rule import RuleResult
+from .check import CheckResult
+from .correction import CorrectionResult
+from .rule import RuleResult
 
 TResult = TypeVar("TResult", bound=RuleResult)
 

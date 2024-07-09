@@ -1,8 +1,8 @@
 import inspect
 from abc import ABCMeta
 
-from pymodify.collector import collect_variables
-from pymodify.rewriter import rewrite_expression
+from .collector import collect_variables
+from .rewriter import rewrite_expression
 
 
 class Condition(metaclass=ABCMeta):

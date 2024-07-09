@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from pymodify import check, correction, Runner
+from datarules import check, correction, Runner
 
 
 @check

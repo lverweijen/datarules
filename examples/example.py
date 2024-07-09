@@ -1,5 +1,5 @@
 import pandas as pd
-from pymodify import load_checks, load_corrections, Runner
+from datarules import load_checks, load_corrections, Runner
 
 df = pd.DataFrame([
     {"width": 3, "height": 7},
