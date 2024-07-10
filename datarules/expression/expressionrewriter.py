@@ -19,8 +19,6 @@ class ExpressionRewriter(ast.NodeTransformer):
     def visit_Not(self, node):
         return ast.Invert()
 
-    # TODO Undo operator chaining
-    # TODO Turn in into '.isin'
     def visit_Compare(self, node):
         self.generic_visit(node)
 
@@ -43,6 +41,7 @@ class ExpressionRewriter(ast.NodeTransformer):
         return res
 
     def visit_If(self, node):
+        """Transform into `not test or body`."""
         self.generic_visit(node)
         body = node.body
         if len(body) == 1:
@@ -50,6 +49,13 @@ class ExpressionRewriter(ast.NodeTransformer):
             return ast.BinOp(ast.UnaryOp(ast.Invert(), node.test), ast.BitOr(), statement)
         else:
             raise Exception("Multiline body is not supported.")
+
+    def visit_IfExp(self, node):
+        """Transform into `body.where(condition, else)`."""
+        self.generic_visit(node)
+        return ast.Call(ast.Attribute(value=node.body, attr="where", ctx=ast.Load()),
+                        args=[node.test, node.orelse],
+                        keywords=[])
 
 
 def rewrite_expression(string):
@@ -73,6 +79,9 @@ def main():
     print(rewrite_expression(expr))
 
     expr = "x in ['huis', 'boom', 'beest']"
+    print(rewrite_expression(expr))
+
+    expr = "x if x > 0 else -x"
     print(rewrite_expression(expr))
 
 
