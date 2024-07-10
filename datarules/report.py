@@ -29,12 +29,6 @@ class Report(Collection[TResult], metaclass=ABCMeta):
     def summary(self):
         return pd.DataFrame([res.summary() for res in self], columns=self.result_cls.fields)
 
-    def print_tracebacks(self):
-        for res in self:
-            if res.error:
-                import traceback
-                traceback.print_tb(res.error.__traceback__)
-
 
 class CheckReport(Report[CheckResult]):
     result_cls = CheckResult

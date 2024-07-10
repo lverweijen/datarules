@@ -1,5 +1,6 @@
 import inspect
 from abc import ABCMeta
+from collections.abc import Sequence
 
 from .collector import collect_variables
 from .rewriter import rewrite_expression
@@ -7,13 +8,17 @@ from .rewriter import rewrite_expression
 
 class Condition(metaclass=ABCMeta):
     @classmethod
-    def make(cls, obj, rewrite=True):
+    def make(cls, obj):
         if isinstance(obj, cls):
             return obj
         elif callable(obj):
             return FunctionCondition(obj)
         elif isinstance(obj, str):
-            return StringCondition(obj, rewrite=rewrite)
+            return StringCondition(obj)
+        elif isinstance(obj, Sequence) and callable(obj[0]):
+            return FunctionCondition(*obj)
+        elif isinstance(obj, Sequence) and isinstance(obj[0], str):
+            return StringCondition(*obj)
         else:
             raise TypeError
 
@@ -35,17 +40,24 @@ class StringCondition(Condition):
 
 
 class FunctionCondition(Condition):
-    def __init__(self, function):
+    def __init__(self, function, parameters=None):
         self.function = function
-        self.parameters = inspect.signature(function).parameters
+
+        if parameters is None:
+            parameters = inspect.signature(function).parameters
+        elif isinstance(parameters, str):
+            parameters = parameters.split()
+
+        self.parameters = parameters
 
     def __call__(self, data=None, **kwargs):
         if data is None:
             data = kwargs
         else:
             data = {**data, **kwargs}
-        data = {k: v for k, v in data.items() if k in self.parameters}
-        return self.function(**data)
+
+        args = (data[param] for param in self.parameters)
+        return self.function(*args)
 
     def __str__(self):
         parameter_str = ", ".join(self.parameters)

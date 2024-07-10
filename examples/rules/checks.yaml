@@ -1,8 +1,13 @@
 rules:
-- name: check_almost_square
+- name: almost_square
   condition: (width - height).abs() < 5
   tags: P1 basic
-- name: check_depth
+- name: not_too_deep
   condition: depth < 3
+  tags: P1 basic
 - name: height_is_even
   condition: height % 2 == 0
+  tags: parity
+- name: height_lt_width
+  condition: height < width
+  tags: inequality

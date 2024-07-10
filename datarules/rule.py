@@ -12,7 +12,7 @@ class Rule(metaclass=ABCMeta):
     def _rule_init(self):
         # NOTE super.__post_init_() doesn't work for some reason.
         if self.name is None:
-            self.name = f"rule_{id(self)}"
+            self.name = f"{type(self).__name__.casefold()}_{id(self)}"
 
         if isinstance(self.tags, str):
             self.tags = self.tags.split()

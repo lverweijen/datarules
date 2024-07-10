@@ -1,42 +1,35 @@
 import dataclasses
 import traceback
 import warnings
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, Sequence, Tuple
 
 import pandas as pd
 
 from .primitives import Condition, FunctionCondition
 from .rule import Rule, RuleResult
 
+Predicate = Callable[..., bool]
+
 
 @dataclasses.dataclass(slots=True)
 class Check(Rule):
-    condition: Condition | str | Callable[[Any], bool]
-    rewrite: bool = True
-    columns: Optional[str] = None
+    condition: Condition | str | Predicate | Tuple[Predicate, Sequence[str]]
 
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
 
     def __post_init__(self):
-        self.condition = Condition.make(self.condition, rewrite=self.rewrite)
+        self.condition = Condition.make(self.condition)
 
         if isinstance(self.condition, FunctionCondition):
             condition = self.condition
             self.name = self.name or condition.name
             self.description = self.description or condition.description
 
-        if isinstance(self.columns, str):
-            self.columns = [self.columns]
-
         self._rule_init()
 
     def __call__(self, data=None, **kwargs):
-        # Renaming
-        if self.columns:
-            data = {p: data[c] for p, c in zip(self.condition.parameters, self.columns)}
-
         return self.condition(data, **kwargs)
 
     def run(self, data=None, **kwargs) -> "CheckResult":
@@ -49,20 +42,35 @@ class Check(Rule):
             error = err
             traceback.print_exc()
 
-        return CheckResult(check=self,
-                           result=result,
-                           error=error,
-                           warnings=wrn)
+        return CheckResult(check=self, result=result, error=error, warnings=wrn)
 
     @property
     def fails(self):
-        def invert(*args, **kwargs):
-            return ~self(*args, **kwargs)
+        return CheckFails(self)
 
-        invert.__name__ = self.name + ".fails"
-        condition = FunctionCondition(invert)
-        condition.parameters = self.condition.parameters
-        return condition
+
+class CheckFails(Condition):
+    def __init__(self, check):
+        self.check = check
+
+    def __str__(self):
+        parameter_str = ", ".join(self.parameters)
+        return f"{self.check.name}.fails({parameter_str})"
+
+    def __call__(self, data, **kwargs):
+        return ~self.check(data, **kwargs)
+
+    @property
+    def name(self):
+        return f"{self.check.name}.fails"
+
+    @property
+    def description(self):
+        return self.check.description
+
+    @property
+    def parameters(self):
+        return self.check.condition.parameters
 
 
 class CheckResult(RuleResult):
