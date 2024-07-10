@@ -1,4 +1,4 @@
-# pymodify
+# DataRules
 
 ## Goal and motivation
 
@@ -7,10 +7,10 @@ Whenever possible, it does this in a vectorized way, which makes this library fa
 
 
 Reasons to make this:
-- Implement the whole data pipeline in a single language (python).
-No need to call subprocess or http to send your data to R and back.
-- Directly use pandas and all other python packages you are already familiar with. No need to relearn how everything is done in R.
-- Validation can be fast if vectorized.
+- Implement an alternative to https://github.com/data-cleaning/ based on python and pandas.
+- Implement both validation and correction. Most existing packages provide validation only.
+- Support a rule based way of data processing. The rules can be maintained in a separate file (python or yaml) if required.
+- Apply vectorization to make processing fast.
 
 ## Usage
 
@@ -96,10 +96,10 @@ Output:
 
 ## Similar work (python)
 
-These work on pandas:
+These work on pandas, but only do validation:
 
-- [Pandera](https://pandera.readthedocs.io/en/stable/index.html) - A good alternative for validation only. Like us, their checks are vectorized too.
-- [Pandantic](https://github.com/wesselhuising/pandantic) - A combination of validation and parsing based on [pydantic](https://docs.pydantic.dev/latest/).
+- [Pandera](https://pandera.readthedocs.io/en/stable/index.html) - Like us, their checks are also vectorized.
+- [Pandantic](https://github.com/wesselhuising/pandantic) - Combination of validation and parsing based on [pydantic](https://docs.pydantic.dev/latest/).
 
 The following offer validation only, but none of them seem to be vectorized or support pandas directly.
 
@@ -108,16 +108,16 @@ The following offer validation only, but none of them seem to be vectorized or s
 - [validator](https://github.com/CSenshi/Validator)
 - [python-valid8](https://github.com/smarie/python-valid8)
 - [pyruler](https://github.com/danteay/pyruler) - Dead project that is rule-based.
-- [pyrules](https://github.com/miraculixx/pyrules) - Dead project for corrections.
+- [pyrules](https://github.com/miraculixx/pyrules) - Dead project that supports rule based corrections (but no validation).
 
 ## Similar work (R)
 
 This project is inspired by https://github.com/data-cleaning/.
 Similar functionality can be found in the following R packages:
 
-- [validate](https://github.com/data-cleaning/validate)
-- [dcmodify](https://github.com/data-cleaning/dcmodify)
-- [errorlocate](https://github.com/data-cleaning/errorlocate)
-- [deductive](https://github.com/data-cleaning/deductive)
+- [validate](https://github.com/data-cleaning/validate) - Checking data (implemented)
+- [dcmodify](https://github.com/data-cleaning/dcmodify) - Correcting data (implemented)
+- [errorlocate](https://github.com/data-cleaning/errorlocate) - Identifying and removing errors (not yet implemented)
+- [deductive](https://github.com/data-cleaning/deductive) - Deductivate correction based on checks (not yet implemented)
 
 Features found in one of the packages above but not implemented here, might eventually make it into this package too.
