@@ -1,9 +1,16 @@
+import builtins
 import inspect
 from abc import ABCMeta
 from collections.abc import Sequence
 
-from .collector import collect_variables
-from .rewriter import rewrite_expression
+from .expression import check_expression, collect_expression, rewrite_expression
+
+
+# Construct a list of safe builtins
+_SAFE_BUILTINS_LIST = ['abs', 'sum', 'all', 'any', 'float', 'hex', 'int', 'bool', 'str',
+                       'isinstance', 'len', 'list', 'dict', 'range', 'repr', 'reversed', 'round',
+                       'set', 'slice', 'sorted', 'tuple', 'type', 'zip']
+SAFE_BUILTINS = {f: getattr(builtins, f) for f in _SAFE_BUILTINS_LIST}
 
 
 class Condition(metaclass=ABCMeta):
@@ -24,11 +31,16 @@ class Condition(metaclass=ABCMeta):
 
 
 class StringCondition(Condition):
-    def __init__(self, code, rewrite=True):
+    def __init__(self, code, rewrite=True, check=True):
+        if check:
+            safety_analysis = check_expression(code)
+            if safety_analysis.problems:
+                problem_str = "\n".join(safety_analysis.problems)
+                raise Exception("Code is unsafe:\n" + problem_str)
         if rewrite:
             code = rewrite_expression(code)
         self.code = code
-        self.parameters = collect_variables(code).inputs
+        self.parameters = collect_expression(code).inputs
 
     def __str__(self):
         return self.code
@@ -36,7 +48,9 @@ class StringCondition(Condition):
     def __call__(self, data=None, **kwargs):
         if data is None:
             data = {}
-        return eval(self.code, kwargs, data)
+
+        globals = {'__builtins__': SAFE_BUILTINS, **kwargs}
+        return eval(self.code, globals, data)
 
 
 class FunctionCondition(Condition):
@@ -86,9 +100,14 @@ class Action(metaclass=ABCMeta):
 
 
 class StringAction(Action):
-    def __init__(self, code):
+    def __init__(self, code, check=True):
+        if check:
+            safety_analysis = check_expression(code)
+            if safety_analysis.problems:
+                problem_str = "\n".join(safety_analysis.problems)
+                raise Exception("Code is unsafe:\n" + problem_str)
         self.code = code
-        variables = collect_variables(code)
+        variables = collect_expression(code)
         self.parameters = variables.inputs
         self.targets = variables.outputs
 
@@ -101,7 +120,8 @@ class StringAction(Action):
         else:
             data = {parameter: data[parameter] for parameter in self.parameters}
 
-        exec(self.code, kwargs, data)
+        globals = {'__builtins__': SAFE_BUILTINS, **kwargs}
+        exec(self.code, globals, data)
         result = {target: data[target] for target in self.targets}
         return result
 

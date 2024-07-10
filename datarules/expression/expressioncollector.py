@@ -1,7 +1,7 @@
 import ast
 
 
-class VariableVisitor(ast.NodeVisitor):
+class ExpressionCollector(ast.NodeVisitor):
     def __init__(self):
         self.inputs = set()
         self.outputs = set()
@@ -23,8 +23,8 @@ class VariableVisitor(ast.NodeVisitor):
         self.inputs.add(node.target.id)
 
 
-def collect_variables(expr):
+def collect_expression(expr):
     parsed = ast.parse(expr)
-    visitor = VariableVisitor()
+    visitor = ExpressionCollector()
     visitor.visit(parsed)
     return visitor

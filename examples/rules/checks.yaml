@@ -11,3 +11,7 @@ rules:
 - name: height_lt_width
   condition: height < width
   tags: inequality
+#- name: forbidden_rule
+#  condition: "open('passwords.txt').read()"
+#  tags: forbidden
+# The rule above will just give an error message

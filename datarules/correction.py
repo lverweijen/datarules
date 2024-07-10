@@ -40,13 +40,13 @@ class Correction(Rule):
     def __call__(self, *args, **kwargs):
         return self.action(*args, **kwargs)
 
-    def run(self, data):
+    def run(self, data, **kwargs):
         is_applicable = None
         error = None
 
         try:
-            is_applicable = self.trigger(data)  # Also handle true/false
-            result = self.action(data)
+            is_applicable = self.trigger(data, **kwargs)  # Also handle true/false
+            result = self.action(data, **kwargs)
         except Exception as err:
             error = err
             traceback.print_exc()

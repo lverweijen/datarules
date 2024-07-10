@@ -26,3 +26,6 @@ width_lt_height = Check((operator.lt, ["width", "height"]), tags="inequality")
 
 # Third method of defining checks (pass code as string)
 depth_is_even = Check("depth % 2 == 0", tags="parity")
+
+# This gives an error message. However, you should still not use this on untrusted input.
+# forbidden_rule = Check("open('passwords.txt').read()", tags="parity")

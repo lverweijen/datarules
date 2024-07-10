@@ -1,7 +1,7 @@
 import ast
 
 
-class RewriteExpression(ast.NodeTransformer):
+class ExpressionRewriter(ast.NodeTransformer):
     def visit_BoolOp(self, node):
         self.generic_visit(node)
         match node.op:
@@ -54,7 +54,7 @@ class RewriteExpression(ast.NodeTransformer):
 
 def rewrite_expression(string):
     parsed = ast.parse(string)
-    rewritten = RewriteExpression().visit(parsed)
+    rewritten = ExpressionRewriter().visit(parsed)
     ast.fix_missing_locations(rewritten)
     return ast.unparse(rewritten)
 
