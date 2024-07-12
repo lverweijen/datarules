@@ -6,7 +6,6 @@ __all__ = [
     "CheckList",
     "CorrectionList",
     "Context",
-    "utilities",
 ]
 
 from .check import Check

@@ -41,7 +41,7 @@ In your main code:
 
 ```python
 import pandas as pd
-from datarules import load_checks, Runner
+from datarules import CheckList
 
 df = pd.DataFrame([
     {"width": 3, "height": 7},
@@ -51,8 +51,8 @@ df = pd.DataFrame([
     {"width": 3, "height": -2, "depth": 4},
 ])
 
-checks = load_checks('checks.py')
-report = Runner().check(df, checks)
+checks = CheckList.from_file('checks.py')
+report = checks.run(df)
 print(report)
 ```
 
@@ -81,10 +81,10 @@ def make_square(width, height):
 In your main code:
 
 ```python
-from datarules import load_corrections
+from datarules import CorrectionList
 
-corrections = load_corrections('corrections.py')
-report = Runner().correct(df, corrections)
+corrections = CorrectionList.from_file('corrections.py')
+report = corrections.run(df)
 print(report)
 ```
 

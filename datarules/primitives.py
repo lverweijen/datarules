@@ -42,6 +42,9 @@ class StringCondition(Condition):
         self.code = code
         self.parameters = collect_expression(code).inputs
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.code!r})"
+
     def __str__(self):
         return self.code
 
@@ -63,6 +66,9 @@ class FunctionCondition(Condition):
             parameters = parameters.split()
 
         self.parameters = parameters
+
+    def __repr__(self):
+        return f"{type(self)}({self.name}, {self.parameters})"
 
     def __call__(self, data=None, **kwargs):
         if data is None:

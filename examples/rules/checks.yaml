@@ -1,15 +1,15 @@
 rules:
 - name: almost_square
-  test: (width - height).abs() < 5
+  test: (width - height).abs() <= 4
   tags: P1 basic
 - name: not_too_deep
-  test: depth < 3
+  test: depth <= 2
   tags: P1 basic
 - name: height_is_even
   test: height % 2 == 0
   tags: parity
-- name: height_lt_width
-  test: height < width
+- name: height_le_width
+  test: height <= width
   tags: inequality
 #- name: forbidden_rule
 #  test: "open('passwords.txt').read()"
