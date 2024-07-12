@@ -32,10 +32,13 @@ class Check(Rule):
     def __call__(self, data=None, **kwargs):
         return self.test(data, **kwargs)
 
-    def run(self, data=None, **kwargs) -> "CheckResult":
+    def run(self, data=None, context=None) -> "CheckResult":
+        if context is None:
+            context = dict()
+
         try:
             with warnings.catch_warnings(record=True) as wrn:
-                result = self(data, **kwargs)
+                result = self(data, **context)
             error = None
         except Exception as err:
             result = None

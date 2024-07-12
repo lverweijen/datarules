@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from datarules import check, correction, Runner
+from datarules import check, correction, CorrectionList
 
 
 @check
@@ -10,12 +10,12 @@ def check_almost_square(width, height):
     return (width - height).abs() < 5
 
 
-@correction(condition=check_almost_square.fails)
+@correction(trigger=check_almost_square.fails)
 def make_square(width, height):
     return {"height": height + (width - height) / 2}
 
 
-correctionlist = [make_square]
+correctionlist = CorrectionList([make_square])
 
 
 class CorrectionTests(TestCase):
@@ -42,7 +42,7 @@ class CorrectionTests(TestCase):
         self.assertEqual(0, len(result.warnings))
 
     def test_corrections_together(self):
-        check_report = Runner().correct(self.df, correctionlist)
+        check_report = correctionlist.run(self.df)
         summary = check_report.summary()
         dataframe = check_report.dataframe()
 

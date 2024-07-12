@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from datarules import check, Check, Runner
+from datarules import check, Check, CheckList
 
 
 @check
@@ -25,12 +25,12 @@ check_trivial = Check("width < height or width == height or width > height",
                       name="check_trivial")
 
 
-checklist = [
+checklist = CheckList([
     check_almost_square,
     check_width_around_3,
     check_not_too_deep,
     check_trivial,
-]
+])
 
 
 class CheckTests(TestCase):
@@ -90,13 +90,13 @@ class CheckTests(TestCase):
         self.assertEqual([], check_result.warnings)
 
     def test_check_together(self):
-        check_report = Runner().check(self.df, checklist)
+        check_report = checklist.run(self.df)
         summary = check_report.summary()
         dataframe = check_report.dataframe(errors_only=False)
 
         expected_summary = [
             {'name': 'check_almost_square',
-             'condition': 'check_almost_square(width, height)',
+             'test': 'check_almost_square(width, height)',
              'items': 5,
              'passes': 3,
              'fails': 2,
@@ -104,7 +104,7 @@ class CheckTests(TestCase):
              'error': None,
              'warnings': 0},
             {'name': 'check_width_around_3',
-             'condition': 'check_width_around_3(width)',
+             'test': 'check_width_around_3(width)',
              'items': 1,
              'passes': 1,
              'fails': 0,
@@ -112,7 +112,7 @@ class CheckTests(TestCase):
              'error': None,
              'warnings': 0},
             {'name': 'check_not_too_deep',
-             'condition': 'check_not_too_deep(depth)',
+             'test': 'check_not_too_deep(depth)',
              'items': 5,
              'passes': 1,
              'fails': 1,
@@ -120,7 +120,7 @@ class CheckTests(TestCase):
              'error': None,
              'warnings': 0},
             {'name': 'check_trivial',
-             'condition': '(width < height) | (width == height) | (width > height)',
+             'test': '(width < height) | (width == height) | (width > height)',
              'items': 5,
              'passes': 5,
              'fails': 0,

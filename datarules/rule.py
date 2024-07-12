@@ -18,7 +18,7 @@ class Rule(metaclass=ABCMeta):
             self.tags = self.tags.split()
 
     @abstractmethod
-    def run(self) -> "RuleResult":
+    def run(self, data, context=None) -> "RuleResult":
         ...
 
     @classmethod

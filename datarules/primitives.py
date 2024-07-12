@@ -118,7 +118,8 @@ class StringAction(Action):
         if data is None:
             data = {}
         else:
-            data = {parameter: data[parameter] for parameter in self.parameters}
+            data = {parameter: data[parameter] for parameter in self.parameters
+                    if parameter in data}
 
         globals = {'__builtins__': SAFE_BUILTINS, **kwargs}
         exec(self.code, globals, data)

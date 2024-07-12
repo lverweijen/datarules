@@ -9,3 +9,6 @@ rules:
   if: depth.isna()
   then: depth = depth.mean()
   tags: [P3, missing]
+- name: add_random_month
+  description: Add a new column with a random month
+  action: random_month = 100 * year + np.random.randint(0, 12, len(height))

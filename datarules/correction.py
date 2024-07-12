@@ -9,10 +9,15 @@ from .check import Check
 from .rule import RuleResult, Rule
 
 
+def always_triggered():
+    """A default trigger that is equivalent to not having a trigger at all."""
+    return True
+
+
 @dataclasses.dataclass(slots=True)
 class Correction(Rule):
     action: Action | str | Callable
-    trigger: Test = lambda *_: True
+    trigger: Test = always_triggered
 
     @classmethod
     def from_dict(cls, data):
@@ -41,17 +46,19 @@ class Correction(Rule):
     def __call__(self, *args, **kwargs):
         return self.action(*args, **kwargs)
 
-    def run(self, data, **kwargs):
-        is_applicable = None
-        error = None
+    def run(self, data, context=None):
+        if context is None:
+            context = dict()
 
         try:
-            is_applicable = self.trigger(data, **kwargs)  # Also handle true/false
-            result = self.action(data, **kwargs)
+            is_applicable = self.trigger(data, **context)  # Also handle true/false
+            result = self.action(data, **context)
         except Exception as err:
+            is_applicable = None
             error = err
             traceback.print_exc()
         else:
+            error = None
             if isinstance(is_applicable, bool):
                 is_applicable = pd.Series(is_applicable, index=data.index)
 
@@ -80,7 +87,10 @@ class CorrectionResult(RuleResult):
         return "\n".join(output)
 
     def summary(self):
-        count_applied = self.applied.astype(bool).sum()
+        if self.applied is None:
+            count_applied = 0
+        else:
+            count_applied = self.applied.astype(bool).sum()
 
         return {
             "name": str(self.correction.name),
