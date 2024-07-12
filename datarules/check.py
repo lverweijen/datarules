@@ -1,11 +1,11 @@
 import dataclasses
 import traceback
 import warnings
-from typing import Callable, Any, Optional, Sequence, Tuple
+from typing import Callable, Sequence, Tuple
 
 import pandas as pd
 
-from .primitives import Condition, FunctionCondition
+from .primitives import Test, FunctionTest
 from .rule import Rule, RuleResult
 
 Predicate = Callable[..., bool]
@@ -13,24 +13,24 @@ Predicate = Callable[..., bool]
 
 @dataclasses.dataclass(slots=True)
 class Check(Rule):
-    condition: Condition | str | Predicate | Tuple[Predicate, Sequence[str]]
+    test: Test | str | Predicate | Tuple[Predicate, Sequence[str]]
 
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
 
     def __post_init__(self):
-        self.condition = Condition.make(self.condition)
+        self.test = Test.make(self.test)
 
-        if isinstance(self.condition, FunctionCondition):
-            condition = self.condition
+        if isinstance(self.test, FunctionTest):
+            condition = self.test
             self.name = self.name or condition.name
             self.description = self.description or condition.description
 
         self._rule_init()
 
     def __call__(self, data=None, **kwargs):
-        return self.condition(data, **kwargs)
+        return self.test(data, **kwargs)
 
     def run(self, data=None, **kwargs) -> "CheckResult":
         try:
@@ -49,7 +49,7 @@ class Check(Rule):
         return CheckFails(self)
 
 
-class CheckFails(Condition):
+class CheckFails(Test):
     def __init__(self, check):
         self.check = check
 
@@ -70,11 +70,11 @@ class CheckFails(Condition):
 
     @property
     def parameters(self):
-        return self.check.condition.parameters
+        return self.check.test.parameters
 
 
 class CheckResult(RuleResult):
-    fields = ["name", "condition", "items", "passes", "fails", "NAs", "error", "warnings"]
+    fields = ["name", "test", "items", "passes", "fails", "NAs", "error", "warnings"]
 
     def __init__(self, check, result=None, error=None, warnings=()):
         self.check = check
@@ -101,7 +101,7 @@ class CheckResult(RuleResult):
     def summary(self):
         return {
             "name": str(self.check.name),
-            "condition": str(self.check.condition),
+            "test": str(self.check.test),
             "items": self.items,
             "passes": self.passes,
             "fails": self.fails,

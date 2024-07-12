@@ -1,17 +1,17 @@
 rules:
 - name: almost_square
-  condition: (width - height).abs() < 5
+  test: (width - height).abs() < 5
   tags: P1 basic
 - name: not_too_deep
-  condition: depth < 3
+  test: depth < 3
   tags: P1 basic
 - name: height_is_even
-  condition: height % 2 == 0
+  test: height % 2 == 0
   tags: parity
 - name: height_lt_width
-  condition: height < width
+  test: height < width
   tags: inequality
 #- name: forbidden_rule
-#  condition: "open('passwords.txt').read()"
+#  test: "open('passwords.txt').read()"
 #  tags: forbidden
 # The rule above will just give an error message

@@ -1,7 +1,7 @@
 import builtins
 import inspect
 from abc import ABCMeta
-from collections.abc import Sequence
+from collections.abc import Sequence, Mapping, Callable
 
 from .expression import check_expression, collect_expression, rewrite_expression
 
@@ -13,24 +13,24 @@ _SAFE_BUILTINS_LIST = ['abs', 'sum', 'all', 'any', 'float', 'hex', 'int', 'bool'
 SAFE_BUILTINS = {f: getattr(builtins, f) for f in _SAFE_BUILTINS_LIST}
 
 
-class Condition(metaclass=ABCMeta):
+class Test(metaclass=ABCMeta):
     @classmethod
     def make(cls, obj):
         if isinstance(obj, cls):
             return obj
         elif callable(obj):
-            return FunctionCondition(obj)
+            return FunctionTest(obj)
         elif isinstance(obj, str):
-            return StringCondition(obj)
+            return StringTest(obj)
         elif isinstance(obj, Sequence) and callable(obj[0]):
-            return FunctionCondition(*obj)
+            return FunctionTest(*obj)
         elif isinstance(obj, Sequence) and isinstance(obj[0], str):
-            return StringCondition(*obj)
+            return StringTest(*obj)
         else:
             raise TypeError
 
 
-class StringCondition(Condition):
+class StringTest(Test):
     def __init__(self, code, rewrite=True, check=True):
         if check:
             safety_analysis = check_expression(code)
@@ -53,7 +53,7 @@ class StringCondition(Condition):
         return eval(self.code, globals, data)
 
 
-class FunctionCondition(Condition):
+class FunctionTest(Test):
     def __init__(self, function, parameters=None):
         self.function = function
 
@@ -127,9 +127,14 @@ class StringAction(Action):
 
 
 class FunctionAction(Action):
-    def __init__(self, function):
-        self.function = function
-        self.parameters = inspect.signature(function).parameters
+    def __init__(self, function, targets=None):
+        self.function: Callable[..., Mapping | Sequence] = function
+
+        if isinstance(targets, str):
+            targets = targets.split()
+
+        self.parameters: Sequence[str] = inspect.signature(function).parameters
+        self.targets: Sequence[str] = targets
 
     def __str__(self):
         parameter_str = ", ".join(self.parameters)
@@ -138,7 +143,14 @@ class FunctionAction(Action):
     def __call__(self, data=None, **kwargs):
         data = {**data, **kwargs}
         data = {k: v for k, v in data.items() if k in self.parameters}
-        return self.function(**data)
+        result = self.function(**data)
+
+        if isinstance(result, Mapping):
+            return result
+        elif result is not None and self.targets is None:
+            raise Exception(f"{self} should return Mapping or targets should be declared.")
+        else:
+            return dict(zip(self.targets, result, strict=True))
 
     @property
     def name(self):
