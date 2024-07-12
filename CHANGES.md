@@ -1,3 +1,7 @@
+### Version 0.1.1 ###
+
+Add `datatest.utilities` with function `toposort`.
+
 ### Version 0.1.0 ###
 
 - Get rid of `Runner`.
