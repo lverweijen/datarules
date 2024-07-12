@@ -13,24 +13,24 @@ _SAFE_BUILTINS_LIST = ['abs', 'sum', 'all', 'any', 'float', 'hex', 'int', 'bool'
 SAFE_BUILTINS = {f: getattr(builtins, f) for f in _SAFE_BUILTINS_LIST}
 
 
-class Test(metaclass=ABCMeta):
+class Condition(metaclass=ABCMeta):
     @classmethod
     def make(cls, obj):
         if isinstance(obj, cls):
             return obj
         elif callable(obj):
-            return FunctionTest(obj)
+            return FunctionCondition(obj)
         elif isinstance(obj, str):
-            return StringTest(obj)
+            return StringCondition(obj)
         elif isinstance(obj, Sequence) and callable(obj[0]):
-            return FunctionTest(*obj)
+            return FunctionCondition(*obj)
         elif isinstance(obj, Sequence) and isinstance(obj[0], str):
-            return StringTest(*obj)
+            return StringCondition(*obj)
         else:
             raise TypeError
 
 
-class StringTest(Test):
+class StringCondition(Condition):
     def __init__(self, code, rewrite=True, check=True):
         if check:
             safety_analysis = check_expression(code)
@@ -53,7 +53,7 @@ class StringTest(Test):
         return eval(self.code, globals, data)
 
 
-class FunctionTest(Test):
+class FunctionCondition(Condition):
     def __init__(self, function, parameters=None):
         self.function = function
 

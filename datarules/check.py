@@ -5,7 +5,7 @@ from typing import Callable, Sequence, Tuple
 
 import pandas as pd
 
-from .primitives import Test, FunctionTest
+from .primitives import Condition, FunctionCondition
 from .rule import Rule, RuleResult
 
 Predicate = Callable[..., bool]
@@ -13,16 +13,16 @@ Predicate = Callable[..., bool]
 
 @dataclasses.dataclass(slots=True)
 class Check(Rule):
-    test: Test | str | Predicate | Tuple[Predicate, Sequence[str]]
+    test: Condition | str | Predicate | Tuple[Predicate, Sequence[str]]
 
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
 
     def __post_init__(self):
-        self.test = Test.make(self.test)
+        self.test = Condition.make(self.test)
 
-        if isinstance(self.test, FunctionTest):
+        if isinstance(self.test, FunctionCondition):
             condition = self.test
             self.name = self.name or condition.name
             self.description = self.description or condition.description
@@ -52,7 +52,7 @@ class Check(Rule):
         return CheckFails(self)
 
 
-class CheckFails(Test):
+class CheckFails(Condition):
     def __init__(self, check):
         self.check = check
 

@@ -4,7 +4,7 @@ from typing import Callable
 
 import pandas as pd
 
-from .primitives import Test, FunctionAction, Action
+from .primitives import Condition, FunctionAction, Action
 from .check import Check
 from .rule import RuleResult, Rule
 
@@ -17,7 +17,7 @@ def always_triggered():
 @dataclasses.dataclass(slots=True)
 class Correction(Rule):
     action: Action | str | Callable
-    trigger: Test = always_triggered
+    trigger: Condition = always_triggered
 
     @classmethod
     def from_dict(cls, data):
@@ -33,7 +33,7 @@ class Correction(Rule):
         if isinstance(self.trigger, Check):
             raise ValueError("Check can not be used as a condition, but `check.fails` can.")
 
-        self.trigger = Test.make(self.trigger)
+        self.trigger = Condition.make(self.trigger)
         self.action = Action.make(self.action)
 
         if isinstance(self.action, FunctionAction):
