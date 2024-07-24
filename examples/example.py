@@ -2,6 +2,8 @@ import pandas as pd
 
 from datarules import CheckList, CorrectionList, Context
 
+pd.set_option('display.max_columns', None)
+
 df = pd.DataFrame([
     {"width": 3, "height": 7},
     {"width": 3, "height": 5, "depth": 1},

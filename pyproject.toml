@@ -37,7 +37,8 @@ license = {text = "Apache License 2.0"}
 
 [project.optional-dependencies]
 extras = [
-    "pyaml"
+    "pyaml",
+    "uneval",
 ]
 
 [project.urls]

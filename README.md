@@ -29,12 +29,12 @@ from datarules import check
 
 @check(tags=["P1"])
 def check_almost_square(width, height):
-    return (width - height).abs() < 5
+    return (width - height).abs() <= 4
 
 
 @check(tags=["P3", "completeness"])
 def check_not_too_deep(depth):
-    return depth < 3
+    return depth <= 2
 ```
 
 In your main code:

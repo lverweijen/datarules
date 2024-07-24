@@ -1,3 +1,3 @@
-from datarules.expression.expressionchecker import check_expression
-from datarules.expression.expressioncollector import collect_expression
-from datarules.expression.expressionrewriter import rewrite_expression
+from .expressionchecker import check_expression
+from .expressioncollector import collect_expression
+from .expressionrewriter import rewrite_expression

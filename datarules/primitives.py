@@ -1,10 +1,11 @@
+import ast
 import builtins
 import inspect
 from abc import ABCMeta
 from collections.abc import Sequence, Mapping, Callable
 
+from uneval import Expression, to_ast
 from .expression import check_expression, collect_expression, rewrite_expression
-
 
 # Construct a list of safe builtins
 _SAFE_BUILTINS_LIST = ['abs', 'sum', 'all', 'any', 'float', 'hex', 'int', 'bool', 'str',
@@ -18,6 +19,8 @@ class Condition(metaclass=ABCMeta):
     def make(cls, obj):
         if isinstance(obj, cls):
             return obj
+        elif isinstance(obj, (ast.AST, Expression)):
+            return UnEvalCondition(obj)
         elif callable(obj):
             return FunctionCondition(obj)
         elif isinstance(obj, str):
@@ -90,6 +93,28 @@ class FunctionCondition(Condition):
     @property
     def description(self):
         return inspect.getdoc(self.function)
+
+
+class UnEvalCondition(Condition):
+    def __init__(self, expression: Expression):
+        node = ast.Expression(to_ast(expression))
+        ast.fix_missing_locations(node)
+        self.expression = expression
+        self.parameters = collect_expression(node).inputs
+        self.code = compile(node, 'local', 'eval')
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.expression!r})"
+
+    def __str__(self):
+        return str(self.expression)
+
+    def __call__(self, data=None, **kwargs):
+        if data is None:
+            data = {}
+
+        globals = {'__builtins__': SAFE_BUILTINS, **kwargs}
+        return eval(self.code, globals, data)
 
 
 class Action(metaclass=ABCMeta):
