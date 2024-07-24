@@ -16,6 +16,26 @@ class ExpressionRewriter(ast.NodeTransformer):
                     res = ast.BinOp(res, ast.BitOr(), value)
                 return res
 
+    def visit_BinOp(self, node):
+        """Rewrite implies
+
+        `a >> b` means `a` implies `b`.
+        This is rewritten to (~a) | b
+
+        `a << b` means `b` implies `a`.
+        This is rewritten to a | ~b
+        """
+        self.generic_visit(node)
+        match node.op:
+            case ast.LShift():
+                invert_left = ast.UnaryOp(ast.Invert(), node.left)
+                return ast.BinOp(invert_left, ast.BitOr(), node.right)
+            case ast.RShift():
+                invert_right = ast.UnaryOp(ast.Invert(), node.right)
+                return ast.BinOp(node.left, ast.BitOr(), invert_right)
+            case _:
+                return node
+
     def visit_Not(self, node):
         return ast.Invert()
 
