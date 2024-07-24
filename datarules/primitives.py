@@ -4,8 +4,12 @@ import inspect
 from abc import ABCMeta
 from collections.abc import Sequence, Mapping, Callable
 
-from uneval import Expression, to_ast
-from .expression import check_expression, collect_expression, rewrite_expression
+from uneval import Expression, to_ast, to_code
+
+from .expression import check_expression, collect_expression, ExpressionCollector, \
+    ExpressionChecker, ExpressionRewriter
+
+TExpression = str | Expression | ast.AST
 
 # Construct a list of safe builtins
 _SAFE_BUILTINS_LIST = ['abs', 'sum', 'all', 'any', 'float', 'hex', 'int', 'bool', 'str',
@@ -19,44 +23,53 @@ class Condition(metaclass=ABCMeta):
     def make(cls, obj):
         if isinstance(obj, cls):
             return obj
-        elif isinstance(obj, (ast.AST, Expression)):
-            return UnEvalCondition(obj)
+        elif isinstance(obj, TExpression):
+            return ExpressionCondition(obj)
         elif callable(obj):
             return FunctionCondition(obj)
-        elif isinstance(obj, str):
-            return StringCondition(obj)
         elif isinstance(obj, Sequence) and callable(obj[0]):
             return FunctionCondition(*obj)
-        elif isinstance(obj, Sequence) and isinstance(obj[0], str):
-            return StringCondition(*obj)
+        # Should the case below only handle str??
+        elif isinstance(obj, Sequence) and isinstance(obj[0], TExpression):
+            return ExpressionCondition(*obj)
         else:
             raise TypeError
 
 
-class StringCondition(Condition):
-    def __init__(self, code, rewrite=True, check=True):
+class ExpressionCondition(Condition):
+    def __init__(self, expression: str | Expression, check=True, rewrite=True):
+        node = to_ast(Expression(expression))
         if check:
-            safety_analysis = check_expression(code)
+            safety_analysis = ExpressionChecker()
+            safety_analysis.visit(node)
             if safety_analysis.problems:
                 problem_str = "\n".join(safety_analysis.problems)
                 raise Exception("Code is unsafe:\n" + problem_str)
         if rewrite:
-            code = rewrite_expression(code)
-        self.code = code
-        self.parameters = collect_expression(code).inputs
+            node = ExpressionRewriter().visit(node)
+
+        collector = ExpressionCollector()
+        collector.visit(node)
+        self._expression = Expression(node)
+        self._parameters = collector.inputs
+        self._code = to_code(node)
+
+    @property
+    def parameters(self):
+        return self._parameters
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.code!r})"
+        return f"{type(self).__name__}({self._expression!r})"
 
     def __str__(self):
-        return self.code
+        return str(self._expression)
 
     def __call__(self, data=None, **kwargs):
         if data is None:
             data = {}
 
         globals = {'__builtins__': SAFE_BUILTINS, **kwargs}
-        return eval(self.code, globals, data)
+        return eval(self._code, globals, data)
 
 
 class FunctionCondition(Condition):
@@ -93,28 +106,6 @@ class FunctionCondition(Condition):
     @property
     def description(self):
         return inspect.getdoc(self.function)
-
-
-class UnEvalCondition(Condition):
-    def __init__(self, expression: Expression):
-        node = ast.Expression(to_ast(expression))
-        ast.fix_missing_locations(node)
-        self.expression = expression
-        self.parameters = collect_expression(node).inputs
-        self.code = compile(node, 'local', 'eval')
-
-    def __repr__(self):
-        return f"{type(self).__name__}({self.expression!r})"
-
-    def __str__(self):
-        return str(self.expression)
-
-    def __call__(self, data=None, **kwargs):
-        if data is None:
-            data = {}
-
-        globals = {'__builtins__': SAFE_BUILTINS, **kwargs}
-        return eval(self.code, globals, data)
 
 
 class Action(metaclass=ABCMeta):

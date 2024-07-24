@@ -1,7 +1,5 @@
 import ast
 
-from uneval import to_ast
-
 
 class ExpressionCollector(ast.NodeVisitor):
     def __init__(self):
@@ -26,7 +24,7 @@ class ExpressionCollector(ast.NodeVisitor):
 
 
 def collect_expression(expr):
-    parsed = to_ast(expr)
+    parsed = ast.parse(str(expr))
     visitor = ExpressionCollector()
     visitor.visit(parsed)
     return visitor
