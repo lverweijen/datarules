@@ -4,7 +4,7 @@ import inspect
 from abc import ABCMeta
 from collections.abc import Sequence, Mapping, Callable
 
-from uneval import Expression, to_ast, to_code
+from uneval import Expression, to_ast, to_bytecode
 
 from .expression import check_expression, collect_expression, ExpressionCollector, \
     ExpressionChecker, ExpressionRewriter
@@ -52,7 +52,7 @@ class ExpressionCondition(Condition):
         collector.visit(node)
         self._expression = Expression(node)
         self._parameters = collector.inputs
-        self._code = to_code(node)
+        self._code = to_bytecode(node)
 
     @property
     def parameters(self):

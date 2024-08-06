@@ -38,14 +38,14 @@ license = {text = "Apache License 2.0"}
 [project.optional-dependencies]
 extras = [
     "pyaml",
-    "uneval",
+    "uneval => 0.1.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/lverweijen/datarules"
 Repository = "https://github.com/lverweijen/datarules"
 Issues = "https://github.com/lverweijen/datarules/issues"
-Changelog = "https://github.com/lverweijen/datarules/blob/main/changes.md"
+Changes = "https://github.com/lverweijen/datarules/blob/main/changes.md"
 
 [tool.setuptools.packages.find]
 include = ["datarules*"]

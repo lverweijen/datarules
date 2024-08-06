@@ -1,9 +1,10 @@
 import dataclasses
 import traceback
 import warnings
-from typing import Callable, Sequence, Tuple
+from typing import Callable, Optional
 
 import pandas as pd
+from uneval import Expression
 
 from .primitives import Condition, FunctionCondition
 from .rule import Rule, RuleResult
@@ -13,7 +14,7 @@ Predicate = Callable[..., bool]
 
 @dataclasses.dataclass(slots=True)
 class Check(Rule):
-    test: Condition | str | Predicate | Tuple[Predicate, Sequence[str]]
+    test: Condition | Expression | str | Predicate
 
     @classmethod
     def from_dict(cls, data):
@@ -31,6 +32,10 @@ class Check(Rule):
 
     def __call__(self, data=None, **kwargs):
         return self.test(data, **kwargs)
+
+    def get_expression(self) -> Optional[Expression]:
+        """Return an expression if available."""
+        return getattr(self.test, "expression")
 
     def run(self, data=None, context=None) -> "CheckResult":
         if context is None:
