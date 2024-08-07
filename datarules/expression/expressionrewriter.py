@@ -27,10 +27,10 @@ class ExpressionRewriter(ast.NodeTransformer):
         """
         self.generic_visit(node)
         match node.op:
-            case ast.LShift():
+            case ast.RShift():
                 invert_left = ast.UnaryOp(ast.Invert(), node.left)
                 return ast.BinOp(invert_left, ast.BitOr(), node.right)
-            case ast.RShift():
+            case ast.LShift():
                 invert_right = ast.UnaryOp(ast.Invert(), node.right)
                 return ast.BinOp(node.left, ast.BitOr(), invert_right)
             case _:

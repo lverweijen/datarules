@@ -43,6 +43,10 @@ class ExpressionCondition(Condition):
         self._compiled = safe_compile(node, '<condition>', 'eval')
 
     @property
+    def expression(self):
+        return self._expression
+
+    @property
     def parameters(self):
         return self._parameters
 

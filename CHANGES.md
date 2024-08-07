@@ -1,6 +1,13 @@
+### Version 0.2.0 ###
+
+- Rename `StringCondition` to `ExpressionCondition` and rewrite.
+- Add `check.get_expression()` to return an expression on a check.
+- Bitshift operators were accidentally reversed in meaning.
+- Add primitive sanitizing to primitives (don't rely on it)
+
 ### Version 0.1.1 ###
 
-Add `datatest.utilities` with function `toposort`.
+- Add `datatest.utilities` with function `toposort`.
 
 ### Version 0.1.0 ###
 
