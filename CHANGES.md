@@ -1,3 +1,7 @@
+### Version 0.2.1 ###
+
+Improve Report output
+
 ### Version 0.2.0 ###
 
 - Rename `StringCondition` to `ExpressionCondition` and rewrite.

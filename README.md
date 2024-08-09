@@ -5,7 +5,6 @@
 The idea of this project is to define rules to validate and correct datasets.
 Whenever possible, it does this in a vectorized way, which makes this library fast.
 
-
 Reasons to make this:
 - Implement an alternative to https://github.com/data-cleaning/ based on python and pandas.
 - Implement both validation and correction. Most existing packages provide validation only.
@@ -16,83 +15,71 @@ Reasons to make this:
 
 This package provides two operations on data:
 
-- checks (if data is correct). Also knows as validations.
-- corrections (how to fix incorrect data)
+1) Checks (if data is correct). Also knows as validations.
+2) Corrections (how to fix incorrect data).
 
-### Checks
+## Example
 
-In checks.py
-
-```python
-from datarules import check
-
-
-@check(tags=["P1"])
-def check_almost_square(width, height):
-    return (width - height).abs() <= 4
-
-
-@check(tags=["P3", "completeness"])
-def check_not_too_deep(depth):
-    return depth <= 2
-```
-
-In your main code:
-
+Create some data
 ```python
 import pandas as pd
-from datarules import CheckList
 
 df = pd.DataFrame([
     {"width": 3, "height": 7},
-    {"width": 3, "height": 5, "depth": 1},
     {"width": 3, "height": 8},
-    {"width": 3, "height": 3},
-    {"width": 3, "height": -2, "depth": 4},
 ])
+```
 
-checks = CheckList.from_file('checks.py')
-report = checks.run(df)
-print(report)
+1. Check the data
+```python
+from datarules import CheckList, Check
+from uneval import quote as q
+
+checks = CheckList([
+    Check(name="almost_square",
+          tags=["low-priority"],
+          test=(q.width - q.height).abs() <= 4),
+])
+check_report = checks.run(df)
+print(check_report)
 ```
 
 Output:
 ```
-                  name                           condition  items  passes  fails  NAs error  warnings
-0  check_almost_square  check_almost_square(width, height)      5       3      2    0  None         0
-1   check_not_too_deep           check_not_too_deep(depth)      5       1      4    0  None         0
-
+CheckReport
+-----------
+          name                         test  items  passes  fails  NAs error  warnings
+ almost_square  (width - height).abs() <= 4      2       1      1    0  None         0
 ```
 
-### Corrections
-
-In corrections.py
-
+2. Correct the data
 ```python
-from datarules import correction
-from checks import check_almost_square
+from datarules import CorrectionList, Correction
 
-
-@correction(condition=check_almost_square.fails)
-def make_square(width, height):
-    return {"height": height + (width - height) / 2}
-```
-
-In your main code:
-
-```python
-from datarules import CorrectionList
-
-corrections = CorrectionList.from_file('corrections.py')
-report = corrections.run(df)
-print(report)
+corrections = CorrectionList([
+    Correction(name="correct_square",
+               trigger=checks[0].fails,
+               action={"height": q.height / 2 + q.width / 2}),
+])
+correction_report = corrections.run(df)
+print(correction_report)
+print(f"Modified data:\n{df}")
 ```
 
 Output:
 ```
-          name                                 condition                      action  applied error  warnings
-0  make_square  check_almost_square.fails(width, height)  make_square(width, height)        2  None         0
+CorrectionReport
+----------------
+           name                             trigger                           action  applied error  warnings
+ correct_square  almost_square.fails(height, width)  height = height / 2 + width / 2        1  None         0
+
+Modified data:
+   width  height
+0      3     7.0
+1      3     5.5
 ```
+
+See more examples on [DataRules examples](https://github.com/lverweijen/datarules/tree/main/examples).
 
 ## Similar work (python)
 
@@ -118,6 +105,4 @@ Similar functionality can be found in the following R packages:
 - [validate](https://github.com/data-cleaning/validate) - Checking data (implemented)
 - [dcmodify](https://github.com/data-cleaning/dcmodify) - Correcting data (implemented)
 - [errorlocate](https://github.com/data-cleaning/errorlocate) - Identifying and removing errors (not yet implemented)
-- [deductive](https://github.com/data-cleaning/deductive) - Deductivate correction based on checks (not yet implemented)
-
-Features found in one of the packages above but not implemented here, might eventually make it into this package too.
+- [deductive](https://github.com/data-cleaning/deductive) - Deductive correction based on checks (not yet implemented)

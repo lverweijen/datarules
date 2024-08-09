@@ -1,4 +1,5 @@
-from datarules import check, correction
+from datarules import check, correction, Correction
+from uneval import quote as q
 
 
 # This check is repeated here
@@ -17,3 +18,6 @@ def make_square(width, height):
 def fill_depth(depth):
     """If depth is missing, use its mean value."""
     return {"depth": depth.mean()}
+
+
+label_high = Correction(trigger=q.height >= 5, action = {"is_tall": True})

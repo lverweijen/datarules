@@ -26,6 +26,12 @@ class Report(Collection[TResult], metaclass=ABCMeta):
     def __len__(self):
         return len(self.results)
 
+    def __str__(self):
+        tname = type(self).__name__
+        header = tname + "\n" + len(tname) * '-' + "\n"
+        body = self.summary().to_string(index=None, justify='right')
+        return header + body + "\n"
+
     def summary(self):
         return pd.DataFrame([res.summary() for res in self], columns=self.result_cls.fields)
 

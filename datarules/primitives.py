@@ -108,6 +108,8 @@ class Action(metaclass=ABCMeta):
             return FunctionAction(obj)
         elif isinstance(obj, str):
             return StringAction(obj)
+        elif isinstance(obj, Mapping):
+            return ExpressionDictAction(obj)
         else:
             raise TypeError
 
@@ -172,7 +174,7 @@ class FunctionAction(Action):
 
 class ExpressionDictAction(Action):
     def __init__(self, actions: Mapping[str, Expression]):
-        self.actions = {str(target): Expression(exp) for target, exp in actions.items()}
+        self.actions = {str(target): to_ast(exp) for target, exp in actions.items()}
         self._compiled = {target: safe_compile(exp, '<expression>', 'eval')
                           for target, exp in self.actions.items()}
 
@@ -183,7 +185,7 @@ class ExpressionDictAction(Action):
     def __str__(self):
         output = []
         for target, action in self.actions.items():
-            output.append(f"{target} = {action}")
+            output.append(f"{target} = {ast.unparse(action)}")
         return "\n".join(output)
 
     def __call__(self, df=None, **kwargs):
