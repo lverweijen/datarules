@@ -21,7 +21,7 @@ class Check(Rule):
         return cls(**data)
 
     def __post_init__(self):
-        self.test = Condition.make(self.test)
+        self.test = Condition.make(self.test, filename=self.filename)
 
         if isinstance(self.test, FunctionCondition):
             condition = self.test

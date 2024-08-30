@@ -14,7 +14,7 @@ TExpression = str | Expression | ast.AST
 
 class Condition(metaclass=ABCMeta):
     @classmethod
-    def make(cls, obj):
+    def make(cls, obj, filename=None):
         if isinstance(obj, cls):
             return obj
         elif isinstance(obj, TExpression):
@@ -25,22 +25,24 @@ class Condition(metaclass=ABCMeta):
             return FunctionCondition(*obj)
         # Should the case below only handle str??
         elif isinstance(obj, Sequence) and isinstance(obj[0], TExpression):
-            return ExpressionCondition(*obj)
+            return ExpressionCondition(*obj, filename=filename)
         else:
             raise TypeError
 
 
 class ExpressionCondition(Condition):
-    def __init__(self, expression: str | Expression, rewrite=True):
+    def __init__(self, expression: str | Expression, rewrite=True, filename=None):
         node = to_ast(Expression(expression))
         if rewrite:
             node = ExpressionRewriter().visit(node)
+        if filename is None:
+            filename = "<condition>"
 
         collector = ExpressionCollector()
         collector.visit(node)
         self._expression = Expression(node)
         self._parameters = collector.inputs
-        self._compiled = safe_compile(node, '<condition>', 'eval')
+        self._compiled = safe_compile(node, filename, 'eval')
 
     @property
     def expression(self):
@@ -101,26 +103,29 @@ class FunctionCondition(Condition):
 
 class Action(metaclass=ABCMeta):
     @classmethod
-    def make(cls, obj):
+    def make(cls, obj, filename=None):
         if isinstance(obj, cls):
             return obj
         elif callable(obj):
             return FunctionAction(obj)
         elif isinstance(obj, str):
-            return StringAction(obj)
+            return StringAction(obj, filename=filename)
         elif isinstance(obj, Mapping):
-            return ExpressionDictAction(obj)
+            return ExpressionDictAction(obj, filename=filename)
         else:
             raise TypeError
 
 
 class StringAction(Action):
-    def __init__(self, code):
+    def __init__(self, code, filename=None):
+        if filename is None:
+            filename = '<action>'
+
         self.code = code
         variables = collect_expression(code)
         self.parameters = variables.inputs
         self.targets = variables.outputs
-        self._compiled = safe_compile(code, '<action>', 'exec')
+        self._compiled = safe_compile(code, filename, 'exec')
 
     def __str__(self):
         return self.code
@@ -173,9 +178,11 @@ class FunctionAction(Action):
 
 
 class ExpressionDictAction(Action):
-    def __init__(self, actions: Mapping[str, Expression]):
+    def __init__(self, actions: Mapping[str, Expression], filename=None):
+        if filename is None:
+            filename = '<expression>'
         self.actions = {str(target): to_ast(exp) for target, exp in actions.items()}
-        self._compiled = {target: safe_compile(exp, '<expression>', 'eval')
+        self._compiled = {target: safe_compile(exp, filename, 'eval')
                           for target, exp in self.actions.items()}
 
     @property

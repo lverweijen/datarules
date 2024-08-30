@@ -40,19 +40,21 @@ class RuleList(MutableSequence, metaclass=ABCMeta):
 
     @classmethod
     def _from_pyfile(cls, path: os.PathLike):
-        loader = SourceFileLoader("rules", str(path))
+        filename = str(path)
+        loader = SourceFileLoader("rules", filename)
         module = ModuleType(loader.name)
         loader.exec_module(module)
-        rules = cls()
+        rules = cls(filename=filename)
         for name, value in module.__dict__.items():
             if isinstance(value, cls.element_type):
                 value.name = name
                 rules.append(value)
         return rules
 
-    def __init__(self, rules=()):
+    def __init__(self, rules=(), filename='<unknown>'):
         self._rules = []
         self.extend(rules)
+        self.filename = filename
 
     def __iter__(self):
         return iter(self._rules)

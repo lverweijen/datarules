@@ -104,5 +104,5 @@ Similar functionality can be found in the following R packages:
 
 - [validate](https://github.com/data-cleaning/validate) - Checking data (implemented)
 - [dcmodify](https://github.com/data-cleaning/dcmodify) - Correcting data (implemented)
-- [errorlocate](https://github.com/data-cleaning/errorlocate) - Identifying and removing errors (not yet implemented)
+- [errorlocate](https://github.com/data-cleaning/errorlocate) - Identifying and removing errors (A start has been made [here](https://github.com/lverweijen/FellegiHolt))
 - [deductive](https://github.com/data-cleaning/deductive) - Deductive correction based on checks (not yet implemented)

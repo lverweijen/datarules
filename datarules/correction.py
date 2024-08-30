@@ -34,8 +34,8 @@ class Correction(Rule):
         if isinstance(self.trigger, Check):
             raise ValueError("Check can not be used as a condition, but `check.fails` can.")
 
-        self.trigger = Condition.make(self.trigger)
-        self.action = Action.make(self.action)
+        self.trigger = Condition.make(self.trigger, filename=self.filename)
+        self.action = Action.make(self.action, filename=self.filename)
 
         if isinstance(self.action, FunctionAction):
             action = self.action
