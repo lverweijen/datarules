@@ -3,7 +3,7 @@ import traceback
 from typing import Callable, Dict, Any
 
 import pandas as pd
-from uneval import Expression
+import uneval
 
 from .check import Check
 from .primitives import Condition, FunctionAction, Action
@@ -17,7 +17,7 @@ def always_triggered():
 
 @dataclasses.dataclass(slots=True)
 class Correction(Rule):
-    action: Action | str | Callable | Dict[str, Any | Expression]
+    action: Action | str | Callable | Dict[str, Any | uneval.Expression]
     trigger: Condition = always_triggered
 
     @classmethod

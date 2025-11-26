@@ -1,5 +1,7 @@
 import ast
 
+import uneval
+
 
 class ExpressionChecker(ast.NodeVisitor):
     """
@@ -46,6 +48,8 @@ class ExpressionChecker(ast.NodeVisitor):
 
 
 def check_expression(code):
+    if isinstance(code, uneval.Expression):
+        code = uneval.to_ast(code)
     node = ast.parse(code)
     visitor = ExpressionChecker()
     visitor.visit(node)

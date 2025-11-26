@@ -4,7 +4,7 @@ import warnings
 from typing import Callable, Optional
 
 import pandas as pd
-from uneval import Expression
+import uneval
 
 from .primitives import Condition, FunctionCondition
 from .rule import Rule, RuleResult
@@ -14,7 +14,7 @@ Predicate = Callable[..., bool]
 
 @dataclasses.dataclass(slots=True)
 class Check(Rule):
-    test: Condition | Expression | str | Predicate
+    test: Condition | uneval.ExprType | Predicate
 
     @classmethod
     def from_dict(cls, data):
@@ -33,7 +33,7 @@ class Check(Rule):
     def __call__(self, data=None, **kwargs):
         return self.test(data, **kwargs)
 
-    def get_expression(self) -> Optional[Expression]:
+    def get_expression(self) -> Optional[uneval.Expression]:
         """Return an expression if available."""
         return getattr(self.test, "expression")
 

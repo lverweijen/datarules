@@ -21,7 +21,7 @@ correctionlist = CorrectionList([make_square])
 class CorrectionTests(TestCase):
     def setUp(self):
         self.df = pd.DataFrame([
-            {"width": 3, "height": 7},
+            {"width": 3.0, "height": 7.0},
             {"width": 3, "height": 5, "depth": 1},
             {"width": 3, "height": 8},
             {"width": 3, "height": 3},

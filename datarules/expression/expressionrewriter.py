@@ -1,5 +1,7 @@
 import ast
 
+import uneval
+
 
 class ExpressionRewriter(ast.NodeTransformer):
     def visit_BoolOp(self, node):
@@ -78,9 +80,10 @@ class ExpressionRewriter(ast.NodeTransformer):
                         keywords=[])
 
 
-def rewrite_expression(string):
-    parsed = ast.parse(string)
-    rewritten = ExpressionRewriter().visit(parsed)
+def rewrite_expression(node):
+    if isinstance(node, uneval.Expression):
+        node = uneval.to_ast(node)
+    rewritten = ExpressionRewriter().visit(node)
     ast.fix_missing_locations(rewritten)
     return ast.unparse(rewritten)
 

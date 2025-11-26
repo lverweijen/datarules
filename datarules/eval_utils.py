@@ -9,7 +9,7 @@ import builtins
 
 from uneval import Expression, to_ast
 
-from .expression import ExpressionChecker
+from .expression import check_expression
 
 # Construct a list of safe builtins
 _SAFE_BUILTINS_LIST = ['abs', 'sum', 'all', 'any', 'float', 'hex', 'int', 'bool', 'str',
@@ -25,8 +25,7 @@ def safe_compile(node, *args, **kwargs):
     elif isinstance(node, Expression):
         node = to_ast(node)
 
-    safety_analysis = ExpressionChecker()
-    safety_analysis.visit(node)
+    safety_analysis = check_expression(node)
     if safety_analysis.problems:
         raise UnsafeCodeError(safety_analysis.problems)
 
