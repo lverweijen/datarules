@@ -1,5 +1,5 @@
 from datarules import check, correction, Correction
-from uneval import quote as q
+from uneval import var
 
 
 # This check is repeated here
@@ -20,4 +20,4 @@ def fill_depth(depth):
     return {"depth": depth.mean()}
 
 
-label_high = Correction(trigger=q.height >= 5, action = {"is_tall": True})
+label_high = Correction(trigger=var.height >= 5, action = {"is_tall": True})
