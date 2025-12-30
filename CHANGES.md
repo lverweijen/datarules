@@ -1,3 +1,7 @@
+### Version 0.2.2 ###
+
+- Upgrade internal version of `uneval` to 0.2.0 or higher.
+
 ### Version 0.2.1 ###
 
 Improve Report output
