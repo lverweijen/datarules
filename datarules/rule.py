@@ -8,6 +8,7 @@ class Rule(metaclass=ABCMeta):
     name: str = dataclasses.field(default=None, kw_only=True)
     description: str = dataclasses.field(default="", kw_only=True)
     tags: Collection[str] = dataclasses.field(default=(), kw_only=True)
+    filename: str = dataclasses.field(default=None, kw_only=True)
 
     def _rule_init(self):
         # NOTE super.__post_init_() doesn't work for some reason.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datarules"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
     {name = "lverweijen", email = "lauwerund@gmail.com"}
 ]
@@ -32,7 +32,7 @@ classifiers = [
 ]
 dependencies = [
     "pandas >= 1.5.0",
-    "uneval >= 0.1.0",
+    "uneval >= 0.2.0",
 ]
 license = {text = "Apache License 2.0"}
 

@@ -1,46 +1,50 @@
-import ast
 import inspect
 from abc import ABCMeta
 from collections.abc import Sequence, Mapping, Callable
 
-from uneval import Expression, to_ast
+import uneval
 
 from .eval_utils import safe_compile, safe_globals
-from .expression import collect_expression, ExpressionCollector, \
-    ExpressionRewriter
-
-TExpression = str | Expression | ast.AST
+from .expression import collect_expression, rewrite_expression
 
 
 class Condition(metaclass=ABCMeta):
     @classmethod
-    def make(cls, obj):
+    def make(cls, obj, filename=None):
         if isinstance(obj, cls):
             return obj
-        elif isinstance(obj, TExpression):
+        elif isinstance(obj, bool):
+            # Always True or always false
+            return ExpressionCondition(uneval.to_ast(obj))
+        elif not obj:
+            # None or empty string means always True
+            return ExpressionCondition(uneval.to_ast(True))
+        elif isinstance(obj, uneval.ExprType):
             return ExpressionCondition(obj)
         elif callable(obj):
             return FunctionCondition(obj)
         elif isinstance(obj, Sequence) and callable(obj[0]):
             return FunctionCondition(*obj)
         # Should the case below only handle str??
-        elif isinstance(obj, Sequence) and isinstance(obj[0], TExpression):
-            return ExpressionCondition(*obj)
+        elif isinstance(obj, Sequence) and isinstance(obj[0], uneval.ExprType):
+            return ExpressionCondition(*obj, filename=filename)
         else:
-            raise TypeError
+            raise TypeError(f"Unable to handle {obj}")
 
 
 class ExpressionCondition(Condition):
-    def __init__(self, expression: str | Expression, rewrite=True):
-        node = to_ast(Expression(expression))
+    def __init__(self, expression: uneval.ExprType, rewrite=True, filename=None):
+        expression = uneval.expr(expression)
+        node = uneval.to_ast(expression)
         if rewrite:
-            node = ExpressionRewriter().visit(node)
+            node = rewrite_expression(node)
+        if filename is None:
+            filename = "<condition>"
 
-        collector = ExpressionCollector()
-        collector.visit(node)
-        self._expression = Expression(node)
+        collector = collect_expression(node)
+        self._expression = uneval.expr(node)
         self._parameters = collector.inputs
-        self._compiled = safe_compile(node, '<condition>', 'eval')
+        self._compiled = safe_compile(self._expression, filename, 'eval')
 
     @property
     def expression(self):
@@ -101,26 +105,29 @@ class FunctionCondition(Condition):
 
 class Action(metaclass=ABCMeta):
     @classmethod
-    def make(cls, obj):
+    def make(cls, obj, filename=None):
         if isinstance(obj, cls):
             return obj
         elif callable(obj):
             return FunctionAction(obj)
         elif isinstance(obj, str):
-            return StringAction(obj)
+            return StringAction(obj, filename=filename)
         elif isinstance(obj, Mapping):
-            return ExpressionDictAction(obj)
+            return ExpressionDictAction(obj, filename=filename)
         else:
             raise TypeError
 
 
 class StringAction(Action):
-    def __init__(self, code):
+    def __init__(self, code: str, filename=None):
+        if filename is None:
+            filename = '<action>'
+
         self.code = code
         variables = collect_expression(code)
         self.parameters = variables.inputs
         self.targets = variables.outputs
-        self._compiled = safe_compile(code, '<action>', 'exec')
+        self._compiled = safe_compile(code, filename, 'exec')
 
     def __str__(self):
         return self.code
@@ -173,9 +180,11 @@ class FunctionAction(Action):
 
 
 class ExpressionDictAction(Action):
-    def __init__(self, actions: Mapping[str, Expression]):
-        self.actions = {str(target): to_ast(exp) for target, exp in actions.items()}
-        self._compiled = {target: safe_compile(exp, '<expression>', 'eval')
+    def __init__(self, actions: Mapping[str, uneval.Expression], filename=None):
+        if filename is None:
+            filename = '<expression>'
+        self.actions = {str(target): uneval.expr(exp) for target, exp in actions.items()}
+        self._compiled = {target: safe_compile(exp, filename, 'eval')
                           for target, exp in self.actions.items()}
 
     @property
@@ -185,7 +194,7 @@ class ExpressionDictAction(Action):
     def __str__(self):
         output = []
         for target, action in self.actions.items():
-            output.append(f"{target} = {ast.unparse(action)}")
+            output.append(f"{target} = {action}")
         return "\n".join(output)
 
     def __call__(self, df=None, **kwargs):

@@ -3,7 +3,7 @@ import traceback
 from typing import Callable, Dict, Any
 
 import pandas as pd
-from uneval import Expression
+import uneval
 
 from .check import Check
 from .primitives import Condition, FunctionAction, Action
@@ -17,7 +17,7 @@ def always_triggered():
 
 @dataclasses.dataclass(slots=True)
 class Correction(Rule):
-    action: Action | str | Callable | Dict[str, Any | Expression]
+    action: Action | str | Callable | Dict[str, Any | uneval.Expression]
     trigger: Condition = always_triggered
 
     @classmethod
@@ -34,8 +34,8 @@ class Correction(Rule):
         if isinstance(self.trigger, Check):
             raise ValueError("Check can not be used as a condition, but `check.fails` can.")
 
-        self.trigger = Condition.make(self.trigger)
-        self.action = Action.make(self.action)
+        self.trigger = Condition.make(self.trigger, filename=self.filename)
+        self.action = Action.make(self.action, filename=self.filename)
 
         if isinstance(self.action, FunctionAction):
             action = self.action

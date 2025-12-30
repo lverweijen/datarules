@@ -33,12 +33,12 @@ df = pd.DataFrame([
 1. Check the data
 ```python
 from datarules import CheckList, Check
-from uneval import quote as q
+from uneval import var
 
 checks = CheckList([
     Check(name="almost_square",
           tags=["low-priority"],
-          test=(q.width - q.height).abs() <= 4),
+          test=(var.width - var.height).abs() <= 4),
 ])
 check_report = checks.run(df)
 print(check_report)
@@ -59,7 +59,7 @@ from datarules import CorrectionList, Correction
 corrections = CorrectionList([
     Correction(name="correct_square",
                trigger=checks[0].fails,
-               action={"height": q.height / 2 + q.width / 2}),
+               action={"height": var.height / 2 + var.width / 2}),
 ])
 correction_report = corrections.run(df)
 print(correction_report)
@@ -104,5 +104,5 @@ Similar functionality can be found in the following R packages:
 
 - [validate](https://github.com/data-cleaning/validate) - Checking data (implemented)
 - [dcmodify](https://github.com/data-cleaning/dcmodify) - Correcting data (implemented)
-- [errorlocate](https://github.com/data-cleaning/errorlocate) - Identifying and removing errors (not yet implemented)
+- [errorlocate](https://github.com/data-cleaning/errorlocate) - Identifying and removing errors (A start has been made [here](https://github.com/lverweijen/FellegiHolt))
 - [deductive](https://github.com/data-cleaning/deductive) - Deductive correction based on checks (not yet implemented)

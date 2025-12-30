@@ -24,12 +24,15 @@ def check_not_too_deep(depth):
 check_trivial = Check("width < height or width == height or width > height",
                       name="check_trivial")
 
+check_always_True = Check(True, name='check_always_True')
+
 
 checklist = CheckList([
     check_almost_square,
     check_width_around_3,
     check_not_too_deep,
     check_trivial,
+    check_always_True,
 ])
 
 
@@ -80,7 +83,6 @@ class CheckTests(TestCase):
     def test_check_trivial(self):
         """Attribute which might be missing"""
         check_result = check_trivial.run(self.df)
-        print("check_result = {!r}".format(check_result))
         self.assertEqual(5, check_result.items)
         self.assertEqual(5, check_result.passes)
         self.assertEqual(0, check_result.fails)
@@ -127,29 +129,47 @@ class CheckTests(TestCase):
              'NAs': 0,
              'error': None,
              'warnings': 0},
+            {'name': 'check_always_True',
+             'test': 'True',
+             'items': 1,
+             'passes': 1,
+             'fails': 0,
+             'NAs': 0,
+             'error': None,
+             'warnings': 0},
         ]
 
         expected_df = [
             {'check_almost_square': True,
              'check_width_around_3': True,
              'check_not_too_deep': None,
-             'check_trivial': True},
+             'check_trivial': True,
+             'check_always_True': True,
+             },
             {'check_almost_square': True,
              'check_width_around_3': True,
              'check_not_too_deep': True,
-             'check_trivial': True},
+             'check_trivial': True,
+             'check_always_True': True,
+             },
             {'check_almost_square': False,
              'check_width_around_3': True,
              'check_not_too_deep': None,
-             'check_trivial': True},
+             'check_trivial': True,
+             'check_always_True': True,
+             },
             {'check_almost_square': True,
              'check_width_around_3': True,
              'check_not_too_deep': None,
-             'check_trivial': True},
+             'check_trivial': True,
+             'check_always_True': True,
+             },
             {'check_almost_square': False,
              'check_width_around_3': True,
              'check_not_too_deep': False,
-             'check_trivial': True}]
+             'check_trivial': True,
+             'check_always_True': True,
+             }]
 
         self.assertEqual(expected_summary, summary.to_dict('records'))
         self.assertEqual(expected_df, dataframe.to_dict('records'))

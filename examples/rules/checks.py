@@ -6,13 +6,13 @@ There are two ways to define checks
 """
 
 
-from uneval import quote as q
+from uneval import var
 from datarules import check, Check
 
 # Expression checks (can also be passed as str)
-almost_square = Check((q.width - q.height).abs() <= 6, tags=["P1", "basic"])
-not_too_deep = Check(q.depth <= 4, tags="P3")
-height_is_even = Check(q.height % 2 == 0, tags="parity")
+almost_square = Check((var.width - var.height).abs() <= 6, tags=["P1", "basic"])
+not_too_deep = Check(var.depth <= 4, tags="P3")
+height_is_even = Check(var.height % 2 == 0, tags="parity")
 
 
 # Decorator checks
